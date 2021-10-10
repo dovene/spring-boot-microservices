@@ -1,5 +1,7 @@
 package com.dev.apistarter.controller;
 
+import com.dev.apistarter.exceptionhandler.ProductAlreadyExistException;
+import com.dev.apistarter.exceptionhandler.ProductNotFoundException;
 import com.dev.apistarter.model.Product;
 import com.dev.apistarter.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +22,37 @@ public class ProductController {
 
     @GetMapping("/{reference}")
     public Product getProductById(@PathVariable String reference){
-        return productRepository.findById(reference);
+        Product product = productRepository.findById(reference);
+        if(product == null){
+            throw new ProductNotFoundException(reference);
+        }
+        return product;
     }
 
     @PostMapping
     public Product createProduct(@RequestBody Product product){
-        return productRepository.save(product);
+        Product temporaryProduct = productRepository.save(product);
+        if (temporaryProduct == null) {
+            throw new ProductAlreadyExistException(product.getReference());
+        }
+        return temporaryProduct;
     }
 
     @PutMapping
     public Product updateProduct(@RequestBody Product product){
-        return productRepository.update(product);
+        Product temporaryProduct = productRepository.update(product);
+        if (temporaryProduct == null) {
+            throw new ProductNotFoundException(product.getReference());
+        }
+        return temporaryProduct;
     }
 
     @DeleteMapping("/{reference}")
     public Product deleteProduct(@PathVariable String reference){
-        return productRepository.deleteById(reference);
+        Product temporaryProduct = productRepository.deleteById(reference);
+        if (temporaryProduct == null) {
+            throw new ProductNotFoundException(reference);
+        }
+        return temporaryProduct;
     }
 }
