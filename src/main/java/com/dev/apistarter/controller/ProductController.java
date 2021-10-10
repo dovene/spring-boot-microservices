@@ -3,56 +3,55 @@ package com.dev.apistarter.controller;
 import com.dev.apistarter.exceptionhandler.ProductAlreadyExistException;
 import com.dev.apistarter.exceptionhandler.ProductNotFoundException;
 import com.dev.apistarter.model.Product;
+import com.dev.apistarter.repository.ProductJpaRepository;
 import com.dev.apistarter.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("products")
 public class ProductController {
     @Autowired
-    ProductRepository productRepository;
+    ProductJpaRepository productRepository;
 
     @GetMapping
     public List<Product> getAllProducts(){
-        return productRepository.findAll();
+        return (List<Product>) productRepository.findAll();
     }
 
     @GetMapping("/{reference}")
     public Product getProductById(@PathVariable String reference){
-        Product product = productRepository.findById(reference);
-        if(product == null){
+        Optional<Product> product = productRepository.findById(reference);
+        if(product.isEmpty()){
             throw new ProductNotFoundException(reference);
         }
-        return product;
+        return product.get();
     }
 
     @PostMapping
     public Product createProduct(@RequestBody Product product){
-        Product temporaryProduct = productRepository.save(product);
-        if (temporaryProduct == null) {
+        if (productRepository.existsById(product.getReference())) {
             throw new ProductAlreadyExistException(product.getReference());
         }
-        return temporaryProduct;
+        return productRepository.save(product);
     }
 
     @PutMapping
     public Product updateProduct(@RequestBody Product product){
-        Product temporaryProduct = productRepository.update(product);
-        if (temporaryProduct == null) {
+        if (!productRepository.existsById(product.getReference())) {
             throw new ProductNotFoundException(product.getReference());
         }
-        return temporaryProduct;
+        return productRepository.save(product);
     }
 
     @DeleteMapping("/{reference}")
-    public Product deleteProduct(@PathVariable String reference){
-        Product temporaryProduct = productRepository.deleteById(reference);
-        if (temporaryProduct == null) {
+    public void deleteProduct(@PathVariable String reference){
+        if (!productRepository.existsById(reference)) {
             throw new ProductNotFoundException(reference);
         }
-        return temporaryProduct;
+        productRepository.deleteById(reference);
     }
 }

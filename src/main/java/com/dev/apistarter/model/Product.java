@@ -1,9 +1,25 @@
 package com.dev.apistarter.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table( name = "product")
 public class Product {
+    @Id
+    @Column(name = "reference")
     private String reference;
+
+    @Column(name = "designation")
     private String designation;
+
+    @Column(name = "price")
     private Double price;
+
+    public Product() {
+    }
 
     public Product(String reference, String designation, Double price) {
         this.reference = reference;
