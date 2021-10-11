@@ -16,7 +16,7 @@ public class ApiStarterApplication {
 	}
 
 	@Bean
-	public HttpTraceRepository htttpTraceRepository() {
+	public HttpTraceRepository httpTraceRepository() {
 		return new InMemoryHttpTraceRepository();
 	}
 
